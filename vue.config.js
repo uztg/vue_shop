@@ -5,7 +5,8 @@ module.exports = {
     resolve: {
       extensions:['js','vue','json'],
       alias: {
-        "views":"@/views"
+        "views":"@/views",
+        "assets":"@/assets"
       }
     }
   },
