@@ -2,6 +2,7 @@ html,body,#app{
     height: 100vh;
     margin: 0;
     padding: 0;
+    min-width: 1366px;
 }
 .el-breadcrumb{
     margin-bottom: 15px;
@@ -16,4 +17,13 @@ html,body,#app{
 }
 .el-pagination{
     margin-top: 15px;
+}
+.el-tag{
+    margin: 7px;
+}
+.bdtop{
+    border-top: 1px solid #eee;
+}
+.bdbottom{
+    border-bottom: 1px solid #eee;
 }
