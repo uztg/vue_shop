@@ -76,6 +76,7 @@
                         type="warning"
                         icon="el-icon-setting"
                         size="mini"
+                        @click="showSetRightDialog(scope.row)"
                     >分配权限</el-button>
                     </el-tooltip>
                 </template>
@@ -112,6 +113,18 @@
             <el-button type="primary" @click="editRoles">确 定</el-button>
         </span>
       </el-dialog>
+      <!-- 分配权限的对话框 -->
+      <el-dialog
+        title="分配权限"
+        :visible.sync="SetRightDialogVisible"
+        width="30%" @closed="clearList">
+        <!-- 树形控件 -->
+        <el-tree :data="rightslist" :props="treeProps" show-checkbox node-key="id" default-expand-all :default-checked-keys="defKeys" ref='treeRef'></el-tree>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="SetRightDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="allotRights">确 定</el-button>
+        </span>
+      </el-dialog>
   </div>
 </template>
 
@@ -119,15 +132,32 @@
 export default {
     data(){
         return{
+          // 所有权限的数据
             roleList:[],
+
+            // 树形控件的属性绑定对象
+            rightslist:[],
+
+            // 即将分配权限的ID
+            roleId:'',
+            treeProps:{
+              label:'authName',
+              children: 'children',
+            },
+            //默认选中的节点
+            defKeys:[],
             addRolesDialogVisible:false,
             editRolesDialogVisible:false,
-            //获取角色列表
+
+            //控制分配权限的对话框的隐藏与显示
+            SetRightDialogVisible:false,
+
+            // 获取角色列表
             roleForm:{
                 roleName:'',
                 roleDesc:''
             },
-            //修改角色表单数据
+            // 修改角色表单数据
             editForm:{},
             roleRules:{
                 roleName:[
@@ -223,6 +253,48 @@ export default {
           //给角色权限重新赋值，避免了重新渲染页面
           role.children = res.data
           this.$message.success(res.meta.msg)
+        },
+        //展示分配权限对话框
+        async showSetRightDialog(node){
+          this.roleId = node.id
+          const { data : res } = await this.$http.get('rights/tree')
+          if(res.meta.status !== 200){
+            return this.$message.error('请求权限列表失败')
+          }
+          //把获取到的权限数据保存到rightslist中
+          this.rightslist = res.data
+          this.getLeafKeys(node,this.defKeys)
+          this.SetRightDialogVisible = true
+          console.log(this.rightslist);
+        },
+        // 通过递归的方式获取三级权限的id，并保存到defKeys数组中去
+        getLeafKeys(node,arr){
+          // 如果不包含children属性说明是三级节点
+          if(!node.children){
+            return arr.push(node.id)
+          }
+          // 开始递归
+          node.children.forEach((item)=>this.getLeafKeys(item,arr))
+        },
+        //清空defKeys列表 防止出现bug
+        clearList(){
+          this.defKeys = []
+        },
+        //
+        async allotRights(){
+          const keys =[...this.$refs.treeRef.getCheckedKeys(),...this.$refs.treeRef.getHalfCheckedKeys()]
+          // 根据文档来拼接字符串
+          const idStr = keys.join(',')
+
+          const {data : res} = await this.$http.post(`roles/${this.roleId}/rights`,{rids:idStr})
+
+          if(res.meta.status !== 200) {
+            return this.$message.error(res.meta.msg)
+          }
+
+          this.$message.success(res.meta.msg)
+          this.getRolesList()
+          this.SetRightDialogVisible = false
         }
     }
 }

@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { 
+import {
     Button,
     Form,
     FormItem,
@@ -24,7 +24,10 @@ import {
     Pagination,
     Dialog,
     MessageBox,
-    Tag
+    Tag,
+    Tree,
+    Select,
+    Option
 } from 'element-ui'
 //导入弹框提示
 Vue.use(Button)
@@ -50,5 +53,8 @@ Vue.use(Tooltip)
 Vue.use(Pagination)
 Vue.use(Dialog)
 Vue.use(Tag)
+Vue.use(Tree)
+Vue.use(Select)
+Vue.use(Option)
 Vue.prototype.$message = Message//这个比较特殊，要挂载。
 Vue.prototype.$confirm = MessageBox.confirm;
